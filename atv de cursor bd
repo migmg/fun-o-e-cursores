@@ -170,7 +170,51 @@ END;
 
 DELIMITER ;
 
+5) DELIMITER //
 
+CREATE FUNCTION autores_sem_livros()
+RETURNS TEXT
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE autor_id INT;
+    DECLARE lista_autores TEXT;
+
+    SET lista_autores = '';
+
+    DECLARE cur CURSOR FOR
+        SELECT A.id
+        FROM Autor A
+        WHERE A.id NOT IN (
+            SELECT DISTINCT LA.id_autor
+            FROM Livro_Autor LA
+        );
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN cur;
+
+    main_loop: LOOP
+        FETCH cur INTO autor_id;
+        IF done THEN
+            LEAVE main_loop;
+        END IF;
+
+        SELECT CONCAT(A.primeiro_nome, ' ', A.ultimo_nome) INTO lista_autores
+        FROM Autor A
+        WHERE A.id = autor_id;
+
+        SET lista_autores = CONCAT(lista_autores, '\n');
+
+    END LOOP;
+
+    CLOSE cur;
+
+    RETURN lista_autores;
+END;
+
+//
+
+DELIMITER ;
 
 
 
