@@ -36,3 +36,43 @@ END;
 //
 
 DELIMITER ;
+
+2) DELIMITER //
+
+CREATE FUNCTION listar_livros_por_autor(
+    primeiro_nome_param VARCHAR(255),
+    ultimo_nome_param VARCHAR(255)
+)
+RETURNS TEXT
+BEGIN
+    DECLARE lista_livros TEXT;
+    DECLARE done INT DEFAULT 0;
+    DECLARE livro_titulo VARCHAR(255);
+
+    DECLARE cur CURSOR FOR
+        SELECT L.titulo
+        FROM Livro L
+        WHERE A.primeiro_nome = primeiro_nome_param AND A.ultimo_nome = ultimo_nome_param;
+
+    SET lista_livros = '';
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO livro_titulo;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        SET lista_livros = CONCAT(lista_livros, livro_titulo, '\n');
+    END LOOP;
+
+    CLOSE cur;
+
+    RETURN lista_livros;
+END;
+
+//
+
+DELIMITER ;
+
